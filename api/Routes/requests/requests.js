@@ -8,7 +8,7 @@ const investmentModel = require("../../models/investmentModel");
 
 // withdraw logic starts
 const  withdraw=  async(req,res,next)=>{
-    const {amount,walletId}= req.body
+  const {amount,walletId}= req.body
 try{
 
     const user= req.user 

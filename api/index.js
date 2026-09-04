@@ -18,6 +18,7 @@ const loanRouter = require("./Routes/loans/loanRoute.js");
 const userModel = require("./models/userModel.js");
 const investmentModel = require("./models/investmentModel.js");
 const withdrawalModel = require("./models/withdrawalModel.js");
+const { getGoogleAuthUrl, exchangeCodeForToken, loadStoredToken } = require("../gmailOAuth.js");
 
 dotenv.config();
 const server = express();
@@ -61,6 +62,55 @@ server.use("/loans", loanRouter)
 server.get("/", (req, res) => {
   res.send("okay");
 });
+
+server.get("/gmail/auth-url", async (req, res) => {
+  try {
+    const authUrl = getGoogleAuthUrl();
+    const hasToken = !!(await loadStoredToken());
+    const envType = (process.env.env_type || "development").trim().toLowerCase();
+    const redirectUri = envType === "production"
+      ? (process.env.google_redirect_uri || process.env.google_redirect_uri_render || process.env.google_redirect_uri_local)
+      : (process.env.google_redirect_uri_local || process.env.google_redirect_uri || process.env.google_redirect_uri_render);
+
+    return res.status(200).json({
+      success: true,
+      result: {
+        authUrl,
+        redirectUri,
+        envType,
+        hasRefreshToken: hasToken,
+      },
+    });
+  } catch (error) {
+    return res.status(500).json({ success: false, result: error.message });
+  }
+});
+
+server.get(["/google-redirect", "/gmail-redirect", "/gmail/oauth/callback"], async (req, res) => {
+  try {
+    const { code, error: oauthError } = req.query;
+
+    if (oauthError) {
+      return res.status(400).json({ success: false, result: oauthError });
+    }
+
+    if (!code) {
+      return res.status(400).json({ success: false, result: "Missing Gmail OAuth code" });
+    }
+
+    const token = await exchangeCodeForToken(code);
+    return res.status(200).json({
+      success: true,
+      result: {
+        message: "Gmail refresh token saved successfully",
+        token,
+      },
+    });
+  } catch (error) {
+    return res.status(500).json({ success: false, result: error.message });
+  }
+});
+
 server.use(handleError);
 const mongo_uri = process.env.mongo_uri;
 const port = process.env.PORT || 5000;

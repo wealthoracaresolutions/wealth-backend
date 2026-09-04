@@ -26,7 +26,6 @@ const withdrawalSchema = mongoose.Schema(
       walletId: {
         type: String,
       },
-       
     },
   },
   { timestamps: true }

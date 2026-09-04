@@ -5,7 +5,7 @@ const withdrawalModel = require("../../models/withdrawalModel");
 const coinModel=require("../../models/coinModel.js")
 const jwt = require("jsonwebtoken")
 const {differenceInHours}= require("date-fns")
-const {transporter,setMailOptions}= require("../../../emailconfig.js")
+const { sendEmail } = require("../../../emailconfig.js")
 const { verify } = require("./verify.js");
 const getEmailTemplate = require("../../../createEmailtemplate.js");
 const plans = {
@@ -188,18 +188,8 @@ const recoverAccount=async(req,res,next)=>{
    else{
     const message="Please click the button below to reset your password"
     const html=getEmailTemplate(thisUser.name,message,true,"reset password",`${siteUrl}/resetpassword/${thisUser._id}`)
-    await transporter.sendMail(
-      setMailOptions(email,html)
-    ,(err,info)=>{
-      if(err){
-        return res.status(500).json({success:false, result:err.message})
-      }
-      else{
-        
-        return res.status(200).json({success:true, result:"done"})
-
-      }
-    })
+    await sendEmail(email, html, "Password reset request");
+    return res.status(200).json({success:true, result:"done"})
    }
   } catch (error) {
     next(createCustomError(error.message))
@@ -250,18 +240,8 @@ const demoteUser=async(req,res,next)=>{
         const  {email,name, message}= req.body
 
         const html=getEmailTemplate(name,message)
-        await transporter.sendMail(
-          setMailOptions(email,html)
-        ,(err,info)=>{
-          if(err){
-            return res.status(500).json({success:false, result:err.message})
-          }
-          else{
-            
-            return res.status(200).json({success:true, result:"done"})
-    
-          }
-        })
+        await sendEmail(email, html, "HealthSupport message");
+        return res.status(200).json({success:true, result:"done"})
 
     }
     catch(err){
@@ -284,18 +264,7 @@ const demoteUser=async(req,res,next)=>{
     const updatedUser= await userModel.findByIdAndUpdate(id,{$set:{status:"approved"}});
     const message=`Welcome aboard ${updatedUser.name} we are pleased to inform  you that your request has been approved`
     const html=getEmailTemplate(updatedUser.name,message)
-    await transporter.sendMail(
-      setMailOptions(updatedUser.email,html)
-    ,(err,info)=>{
-      if(err){
-        return res.status(500).json({success:false, result:err.message})
-      }
-      else{
-        
-        return res.status(200).json({success:true, result:"done"})
-
-      }
-    })
+    await sendEmail(updatedUser.email, html, "User approval notice");
     return res.status(200).json({success:true, result:"approved"})
 }catch(err){
   next(createCustomError(err.message))

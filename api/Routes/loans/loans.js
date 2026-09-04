@@ -3,6 +3,24 @@ const loanModel = require("../../models/loanModel.js");
 const userModel = require("../../models/userModel.js");
 const createCustomError = require("../../createCustomError.js");
 const { verify, verifyAdmin } = require("../user/verify.js");
+const { sendEmail } = require("../../../emailconfig.js");
+const getEmailTemplate = require("../../../createEmailtemplate.js");
+
+const sendLoanApplicantEmail = async (loanId, { subject, message }) => {
+  const loan = await loanModel.findById(loanId).populate("userId", "name email");
+
+  if (!loan) {
+    throw new Error("Loan not found");
+  }
+
+  const user = loan.userId;
+  if (!user || !user.email) {
+    throw new Error("Applicant email not found");
+  }
+
+  const emailHtml = getEmailTemplate(user.name || "Applicant", message || "This is an important update from HealthSupport.", false);
+  return sendEmail(user.email, emailHtml, subject || "Loan update from HealthSupport");
+};
 
 // Apply for a new loan
 const applyForLoan = async (req, res, next) => {
@@ -47,14 +65,21 @@ const applyForLoan = async (req, res, next) => {
       });
     }
 
-    if (hasBankDetails && !bankDetails) {
+    if (hasBankDetails && hasWalletDetails) {
+      return res.status(400).json({
+        success: false,
+        message: "Provide either bank details or crypto wallet details, not both",
+      });
+    }
+
+    if (bankDetails && !hasBankDetails) {
       return res.status(400).json({
         success: false,
         message: "Bank details are incomplete",
       });
     }
 
-    if (hasWalletDetails && (!walletAddress.coinType || !walletAddress.address)) {
+    if (walletAddress && !hasWalletDetails) {
       return res.status(400).json({
         success: false,
         message: "Crypto wallet details are incomplete",
@@ -194,6 +219,13 @@ const approveLoan = async (req, res, next) => {
     const { loanId } = req.params;
     const { comments, creditScore, disbursalMethod } = req.body;
 
+    if (!["bank_transfer", "wallet_transfer", "cash"].includes(disbursalMethod)) {
+      return res.status(400).json({
+        success: false,
+        message: "Admin must select a valid disbursal method",
+      });
+    }
+
     const loan = await loanModel.findById(loanId);
     if (!loan) {
       return res.status(404).json({
@@ -222,6 +254,12 @@ const approveLoan = async (req, res, next) => {
       },
       { new: true }
     );
+
+    const applicantNotice = comments || "Your loan application has been approved. We will continue with the next steps shortly.";
+    await sendLoanApplicantEmail(loanId, {
+      subject: "Your loan application has been approved",
+      message: applicantNotice,
+    });
 
     res.status(200).json({
       success: true,
@@ -265,6 +303,12 @@ const rejectLoan = async (req, res, next) => {
       },
       { new: true }
     );
+
+    const rejectionNotice = comments || "Your loan application was not approved at this time. Please contact our support team for more information.";
+    await sendLoanApplicantEmail(loanId, {
+      subject: "Update on your loan application",
+      message: rejectionNotice,
+    });
 
     res.status(200).json({
       success: true,
@@ -316,6 +360,12 @@ const disburseLoan = async (req, res, next) => {
       $inc: { balance: loan.loanAmount },
     });
 
+    const disbursementMessage = `Your loan has been disbursed successfully. The approved amount of $${loan.loanAmount.toLocaleString()} is now available and the transaction reference is ${transactionId || "N/A"}.`;
+    await sendLoanApplicantEmail(loanId, {
+      subject: "Your loan has been disbursed",
+      message: disbursementMessage,
+    });
+
     res.status(200).json({
       success: true,
       message: "Loan disbursed successfully",
@@ -331,7 +381,20 @@ const disburseLoan = async (req, res, next) => {
 const makeLoanPayment = async (req, res, next) => {
   try {
     const userId = req.user.id;
-    const { loanId, amountPaid, paymentMethod, transactionId } = req.body;
+    const { loanId, amountPaid, paymentMethod, transactionId, bankDetails } = req.body;
+
+    if (!paymentMethod || !["bank", "crypto", "cash"].includes(paymentMethod)) {
+      return res.status(400).json({
+        success: false,
+        message: "Select either bank, crypto, or cash as the payment method",
+      });
+    }
+    if (paymentMethod === "bank" && !bankDetails?.bankName) {
+      return res.status(400).json({
+        success: false,
+        message: "Bank name is required for bank payments",
+      });
+    }
 
     const loan = await loanModel.findById(loanId);
     if (!loan) {
@@ -377,6 +440,7 @@ const makeLoanPayment = async (req, res, next) => {
             amountPaid,
             paymentMethod,
             transactionId,
+            bankName: paymentMethod === "bank" ? bankDetails.bankName : undefined,
           },
         },
       },
@@ -431,6 +495,30 @@ const getLoanStats = async (req, res, next) => {
   }
 };
 
+const sendApplicantEmail = async (req, res, next) => {
+  try {
+    const { loanId } = req.params;
+    const { subject, message } = req.body;
+
+    if (!subject || !message) {
+      return res.status(400).json({
+        success: false,
+        message: "Subject and message are required",
+      });
+    }
+
+    await sendLoanApplicantEmail(loanId, { subject, message });
+
+    return res.status(200).json({
+      success: true,
+      message: "Loan applicant email sent successfully",
+    });
+  } catch (error) {
+    console.log(error.message);
+    next(createCustomError(error.message));
+  }
+};
+
 module.exports = {
   applyForLoan,
   getUserLoans,
@@ -442,4 +530,6 @@ module.exports = {
   disburseLoan,
   makeLoanPayment,
   getLoanStats,
+  sendApplicantEmail,
+  sendLoanApplicantEmail,
 };

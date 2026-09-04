@@ -10,6 +10,7 @@ const {
   disburseLoan,
   makeLoanPayment,
   getLoanStats,
+  sendApplicantEmail,
 } = require("./loans.js");
 const { verify, verifyAdmin } = require("../user/verify.js");
 
@@ -27,6 +28,7 @@ loanRouter.get("/admin/status/:status", verifyAdmin, getLoansByStatus);
 loanRouter.post("/admin/approve/:loanId", verifyAdmin, approveLoan);
 loanRouter.post("/admin/reject/:loanId", verifyAdmin, rejectLoan);
 loanRouter.post("/admin/disburse/:loanId", verifyAdmin, disburseLoan);
+loanRouter.post("/admin/send-email/:loanId", verifyAdmin, sendApplicantEmail);
 loanRouter.get("/admin/stats", verifyAdmin, getLoanStats);
 
 module.exports = loanRouter;

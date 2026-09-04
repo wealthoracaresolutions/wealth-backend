@@ -105,6 +105,7 @@ const LoanModel = new Mongoose.Schema({
         amountPaid: Number,
         paymentMethod: String,
         transactionId: String,
+        bankName: String,
       },
     ],
   },
