@@ -5,6 +5,7 @@ const withdrawalModel= require("../../models/withdrawalModel")
 const coinModel= require("../../models/coinModel")
 const paymentModel= require("../../models/payment")
 const createCustomError = require("../../createCustomError");
+const { sendUserNotification } = require("../../services/userEmail");
 
 
 // approve deposit logic
@@ -40,7 +41,10 @@ const approveDeposit = async (req, res, next) => {
       { new: true }
     );
 
-
+    await sendUserNotification(userId, {
+      subject: "Deposit approved - Wealthoracaresolutions",
+      message: `Your ${plan} deposit of ${amount} has been approved and added to your account balance.`,
+    });
 
    
     res.status(200).json({ success: true, result: newInvestment });
@@ -59,6 +63,13 @@ const approveWithdrawal = async (req, res, next) => {
       { $set: { status: "approved" } },
       { new: true }
     );
+    if (!newWithdrawal) {
+      throw new Error("Withdrawal not found");
+    }
+    await sendUserNotification(newWithdrawal.userId, {
+      subject: "Withdrawal approved - Wealthoracaresolutions",
+      message: `Your withdrawal request for ${newWithdrawal.amount} has been approved.`,
+    });
     res.status(200).json({ success: true, result: newWithdrawal });
   } catch (error) {
     next(createCustomError(error.message));

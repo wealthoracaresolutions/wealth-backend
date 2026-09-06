@@ -70,7 +70,7 @@ const getEmailTemplate = (name, message,hasBtn,buttonText,buttonLink) => {
     <body>
         <div class="email-container">
             <div class="email-header">
-                <h1>Welcome to HealthSupport!</h1>
+                <h1>Welcome to Wealthoracaresolutions!</h1>
             </div>
             <div class="email-body">
                 <p>Dear ${name},</p>
@@ -80,8 +80,8 @@ const getEmailTemplate = (name, message,hasBtn,buttonText,buttonLink) => {
                 <p>If you have any questions or need assistance, feel free to reply to this email or contact our support team at any time.</p>
             </div>
             <div class="email-footer">
-                <p>Thank you for choosing HealthSupport!</p>
-                <p><a href="healthsupportservices.onrender.com">Visit our website</a> | <a href="mailto:support@healthsupport.com">Contact Support</a></p>
+                <p>Thank you for choosing Wealthoracaresolutions!</p>
+                <p><a href="Wealthoracaresolutionsservices.onrender.com">Visit our website</a> | <a href="mailto:support@Wealthoracaresolutions.com">Contact Support</a></p>
             </div>
         </div>
     </body>
@@ -92,7 +92,7 @@ const getEmailTemplate = (name, message,hasBtn,buttonText,buttonLink) => {
 // Example usage:
 const emailHTML = getEmailTemplate(
     "Stephen",
-    "We’re thrilled to have you on board! At HealthSupport, we’re committed to providing you with the best medical and health support services."
+    "We’re thrilled to have you on board! At Wealthoracaresolutions, we’re committed to providing you with the best medical and health support services."
 );
 
 // console.log(emailHTML);

@@ -18,8 +18,8 @@ const sendLoanApplicantEmail = async (loanId, { subject, message }) => {
     throw new Error("Applicant email not found");
   }
 
-  const emailHtml = getEmailTemplate(user.name || "Applicant", message || "This is an important update from HealthSupport.", false);
-  return sendEmail(user.email, emailHtml, subject || "Loan update from HealthSupport");
+  const emailHtml = getEmailTemplate(user.name || "Applicant", message || "This is an important update from Wealthoracaresolutions.", false);
+  return sendEmail(user.email, emailHtml, subject || "Loan update from Wealthoracaresolutions");
 };
 
 // Apply for a new loan

@@ -15,6 +15,7 @@ const requestRoute = require("./Routes/requests/requestRoute.js");
 const adminRouter = require("./Routes/admin/route.js");
 const paymentRouter= require("./Routes/payments/paymentRoute.js")
 const loanRouter = require("./Routes/loans/loanRoute.js");
+const tradingSignalRouter = require("./Routes/tradingSignals.js");
 const userModel = require("./models/userModel.js");
 const investmentModel = require("./models/investmentModel.js");
 const withdrawalModel = require("./models/withdrawalModel.js");
@@ -29,6 +30,7 @@ server.use("/admin", adminRouter)
 server.use("/requests", requestRoute)
 server.use("/payments", paymentRouter)
 server.use("/loans", loanRouter)
+server.use("/trading-signals", tradingSignalRouter)
 
 //  user routing optimized to fit with vercel's free tier serverless function count polic
 // server.post("users/login", login);

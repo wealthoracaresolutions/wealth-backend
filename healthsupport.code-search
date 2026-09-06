@@ -1,0 +1,108 @@
+# Query: healthsupport
+# ContextLines: 1
+
+27 results - 15 files
+
+healthsupportfrontend\package-lock.json:
+  1  {
+  2:   "name": "Wealthoracaresolutions",
+  3    "version": "0.1.0",
+
+  7      "": {
+  8:       "name": "Wealthoracaresolutions",
+  9        "version": "0.1.0",
+
+Wealthoracaresolutionsfrontend\package.json:
+  1  {
+  2:   "name": "Wealthoracaresolutions",
+  3    "version": "0.1.0",
+
+Wealthoracaresolutionsfrontend\src\fire.js:
+   8    apiKey: "AIzaSyB4bWys3atCjlPJBeLx1uKy3Yaf-GNxOkM",
+   9:   authDomain: "Wealthoracaresolutions-f5720.firebaseapp.com",
+  10:   projectId: "Wealthoracaresolutions-f5720",
+  11:   storageBucket: "Wealthoracaresolutions-f5720.firebasestorage.app",
+  12    messagingSenderId: "801597083107",
+
+Wealthoracaresolutionsfrontend\src\components\about.jsx:
+  100          <Description>
+  101:           At <Highlight>Wealthoracaresolutions</Highlight>, we are dedicated to enhancing your well-being and financial stability.
+  102            Our wide range of services, including <Highlight>medical support</Highlight>, <Highlight>investment plans</Highlight>, 
+
+Wealthoracaresolutionsfrontend\src\components\aboutus.jsx:
+  62                <Description className="mb-6">
+  63:                 At <Highlight>Wealthoracaresolutions</Highlight>, we are dedicated to
+  64                  enhancing your well-being and financial stability. Our wide
+
+Wealthoracaresolutionsfrontend\src\components\footer.jsx:
+  174            >
+  175:             Wealthoracaresolutions tech team
+  176            </a>
+
+Wealthoracaresolutionsfrontend\src\components\header.jsx:
+   94                {" "}
+   95:               info@Wealthoracaresolutions
+   96              </span>
+
+  108          <Container>
+  109:           <Navbar.Brand href="/home">Wealthoracaresolutions</Navbar.Brand>
+  110            <Navbar.Toggle aria-controls="basic-navbar-nav" />
+
+Wealthoracaresolutionsfrontend\src\pages\carRewards.jsx:
+  204              <p>
+  205:               At Wealthoracaresolutions, our best investors don’t just receive returns — they become part of a
+  206                tradition of excellence. Through our new policy, standout investors are celebrated with premium
+
+Wealthoracaresolutionsfrontend\src\pages\Home.jsx:
+  290          <Content>
+  291:           <h1 className="fadeinUp">Welcome to Wealthoracaresolutions</h1>
+  292            <p>
+
+Wealthoracaresolutionsfrontend\src\pages\pendingdeposits.jsx:
+  77                <i className="fa fa-envelope text-primary me-2"></i>
+  78:               info@Wealthoracaresolutions.com
+  79              </small>
+
+supportbackend\createEmailtemplate.js:
+  72              <div class="email-header">
+  73:                 <h1>Welcome to Wealthoracaresolutions!</h1>
+  74              </div>
+
+  82              <div class="email-footer">
+  83:                 <p>Thank you for choosing Wealthoracaresolutions!</p>
+  84:                 <p><a href="Wealthoracaresolution.onrender.com">Visit our website</a> | <a href="mailto:support@Wealthoracaresolutions.com">Contact Support</a></p>
+  85              </div>
+
+  94      "Stephen",
+  95:     "We’re thrilled to have you on board! At Wealthoracaresolutions, we’re committed to providing you with the best medical and health support services."
+  96  );
+
+supportbackend\emailconfig.js:
+  14  
+  15: const setMailOptions = (to, html, subject = "Info from Wealthoracaresolutions!") => ({
+  16:   from: `"Wealthoracaresolutions" <${process.env.gmail_user || "wealthoracaresolutions@gmail.com"}>`,
+  17    to,
+
+  21  
+  22: const sendEmail = async (to, html, subject = "Info from HealthSupport!") => {
+  23    try {
+
+supportbackend\gmailOAuth.js:
+  115    const messageParts = [
+  116:     `From: "HealthSupport" <${sender}>`,
+  117      `To: ${to}`,
+
+supportbackend\api\Routes\loans\loans.js:
+  20  
+  21:   const emailHtml = getEmailTemplate(user.name || "Applicant", message || "This is an important update from HealthSupport.", false);
+  22:   return sendEmail(user.email, emailHtml, subject || "Loan update from HealthSupport");
+  23  };
+
+supportbackend\api\Routes\user\controllers.js:
+   18  };
+   19: const siteUrl= "https://healthsupportservices.onrender.com"
+   20  //  add wallet
+
+  242          const html=getEmailTemplate(name,message)
+  243:         await sendEmail(email, html, "Wealthoracarsolutions message");
+  244          return res.status(200).json({success:true, result:"done"})

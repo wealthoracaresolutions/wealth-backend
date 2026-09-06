@@ -113,7 +113,7 @@ const createGmailTransporter = async () => {
 const sendGmailMail = async ({ to, subject, html, text }) => {
   const { gmail, sender } = await createGmailTransporter();
   const messageParts = [
-    `From: "HealthSupport" <${sender}>`,
+    `From: "Wealthoracaresolutions" <${sender}>`,
     `To: ${to}`,
     `Subject: ${subject}`,
     "MIME-Version: 1.0",

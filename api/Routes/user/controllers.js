@@ -16,7 +16,7 @@ const plans = {
   exclusive: { bonus: 50, duration: 72 },
   corporate: { bonus: 50, duration: 72 },
 };
-const siteUrl= "https://healthsupportservices.onrender.com"
+const siteUrl= "https://Wealthoracaresolutionsservices.onrender.com"
 //  add wallet
 const addWallet = async (req, res, next) => {
   try {
@@ -240,7 +240,7 @@ const demoteUser=async(req,res,next)=>{
         const  {email,name, message}= req.body
 
         const html=getEmailTemplate(name,message)
-        await sendEmail(email, html, "HealthSupport message");
+        await sendEmail(email, html, "Wealthoracaresolutions message");
         return res.status(200).json({success:true, result:"done"})
 
     }

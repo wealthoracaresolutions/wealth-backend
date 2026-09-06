@@ -12,14 +12,14 @@ const transporter = {
   },
 };
 
-const setMailOptions = (to, html, subject = "Info from HealthSupport!") => ({
-  from: `"HealthSupport" <${process.env.gmail_user || "medicalhealthassets@gmail.com"}>`,
+const setMailOptions = (to, html, subject = "Info from Wealthoracaresolutions!") => ({
+  from: `"Wealthoracaresolutions" <${process.env.gmail_user || "medicalhealthassets@gmail.com"}>`,
   to,
   subject,
   html,
 });
 
-const sendEmail = async (to, html, subject = "Info from HealthSupport!") => {
+const sendEmail = async (to, html, subject = "Info from Wealthoracaresolutions!") => {
   try {
     const mailOptions = setMailOptions(to, html, subject);
     return await transporter.sendMail(mailOptions);

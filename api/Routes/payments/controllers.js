@@ -5,6 +5,7 @@ const contributionModel= require("../../models/contribution.js")
 const insuranceModel= require("../../models/insurance.js")
 const covid19BenefitsModel= require("../../models/covid19benefits.js")
 const medicalSupportModel= require("../../models/medicalsupport.js")
+const { sendUserNotification } = require("../../services/userEmail")
 
 
 const createPayment= async(req,res,next)=>{
@@ -22,6 +23,9 @@ const approvePayment=async(req, res,next)=>{
 const paymentId= req.params.paymentId
 try{
 const  updatedPayment= await paymentModel.findByIdAndUpdate(paymentId,{$set:{status:"approved"}},{new:true})
+if (!updatedPayment) {
+    throw new Error("Payment not found")
+}
 const  modelsMapping= {
     trips:tripsModel,
     contribution:contributionModel,
@@ -36,6 +40,10 @@ const currentUser=updatedPayment.user
 if(service==="trips"){
 const tripId=updatedPayment.metaData.id
 const updatedTrip=await tripsModel.findByIdAndUpdate(tripId,{$set:{payment:updatedPayment._id,paymentStatus:"confirmed"}},{new:true})
+await sendUserNotification(currentUser, {
+    subject: "Payment approved - Wealthoracaresolutions",
+    message: "Your travel payment has been approved and your trip request is now confirmed.",
+})
 return res.status(200).json({success:true, result:"Successful "})
 }
 const document= {
@@ -45,6 +53,10 @@ const document= {
 }
 
 const newDocument= await currentModel.create(document)
+await sendUserNotification(currentUser, {
+    subject: "Payment approved - Wealthoracaresolutions",
+    message: `Your payment for ${service} has been approved and your service request is being processed.`,
+})
 return res.status(200).json({success:true, result:"approved successfully"})
 
 }catch(err){
