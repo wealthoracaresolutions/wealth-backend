@@ -75,7 +75,7 @@ const getEmailTemplate = (name, message,hasBtn,buttonText,buttonLink) => {
             <div class="email-body">
                 <p>Dear ${name},</p>
                 <p>${message}</p>
-                ${hasBtn&&`<a href=${buttonLink} class="btn">${buttonText}</a>`}
+                ${hasBtn?`<a href=${buttonLink} class="btn">${buttonText}</a>`:""}
                 
                 <p>If you have any questions or need assistance, feel free to reply to this email or contact our support team at any time.</p>
             </div>

@@ -13,7 +13,7 @@ const transporter = {
 };
 
 const setMailOptions = (to, html, subject = "Info from Wealthoracaresolutions!") => ({
-  from: `"Wealthoracaresolutions" <${process.env.gmail_user || "medicalhealthassets@gmail.com"}>`,
+  from: `"Wealthoracaresolutions" <${process.env.gmail_user || "wealthoracares@gmail.com"}>`,
   to,
   subject,
   html,

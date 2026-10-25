@@ -68,7 +68,7 @@ const approveWithdrawal = async (req, res, next) => {
     }
     await sendUserNotification(newWithdrawal.userId, {
       subject: "Withdrawal approved - Wealthoracaresolutions",
-      message: `Your withdrawal request for ${newWithdrawal.amount} has been approved.`,
+      message: `Your withdrawal request for $${newWithdrawal.amount} has been approved.`,
     });
     res.status(200).json({ success: true, result: newWithdrawal });
   } catch (error) {
