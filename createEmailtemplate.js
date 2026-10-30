@@ -96,4 +96,5 @@ const emailHTML = getEmailTemplate(
 );
 
 // console.log(emailHTML);
+// hi
 module.exports=getEmailTemplate
