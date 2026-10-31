@@ -136,6 +136,20 @@ const loginWithToken = async (req, res, next) => {
 const register = async (req, res, next) => {
   try {
     const newUser = await userModel.create(req.body);
+    await userModel.updateMany(
+      { isAdmin: true },
+      {
+        $push: {
+          notifications: {
+            title: "Pending registration",
+            message: `${newUser.name} has registered and is awaiting approval.`,
+            registrationId: newUser._id,
+            createdAt: new Date(),
+            read: false,
+          },
+        },
+      }
+    );
     const token = await jwt.sign(
       { id: newUser._id, isAdmin: newUser.isAdmin },
       process.env.jwt_pass
@@ -174,6 +188,57 @@ const getTotalStat = async (req, res, next) => {
   }
 };
 // get stats logic ends here
+
+const getNotifications = async (req, res, next) => {
+  try {
+    const user = await userModel.findById(req.user.id).select("notifications isAdmin");
+    if (!user) {
+      return res.status(404).json({ success: false, result: "User not found" });
+    }
+
+    let notifications = user.notifications.slice().reverse();
+    if (user.isAdmin) {
+      const pendingRegistrations = await userModel
+        .find({ status: "pending", isAdmin: { $ne: true } })
+        .select("_id name")
+        .sort({ _id: -1 });
+      const pendingIds = new Set(
+        pendingRegistrations.map((registration) => String(registration._id))
+      );
+      const notifiedRegistrationIds = new Set(
+        notifications
+          .filter((notification) => notification.registrationId)
+          .map((notification) => String(notification.registrationId))
+      );
+
+      notifications = notifications.filter(
+        (notification) =>
+          !notification.registrationId ||
+          pendingIds.has(String(notification.registrationId))
+      );
+      pendingRegistrations.forEach((registration) => {
+        const registrationId = String(registration._id);
+        if (!notifiedRegistrationIds.has(registrationId)) {
+          notifications.push({
+            _id: `registration-${registrationId}`,
+            title: "Pending registration",
+            message: `${registration.name} has registered and is awaiting approval.`,
+            registrationId,
+            createdAt: registration._id.getTimestamp(),
+            read: false,
+          });
+        }
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      result: notifications,
+    });
+  } catch (error) {
+    next(createCustomError(error.message));
+  }
+};
 
 // account recovery
 
@@ -261,8 +326,19 @@ const demoteUser=async(req,res,next)=>{
   const approveUser=async(req,res,next)=>{
   try{
     const {id}= req.params;
-    const updatedUser= await userModel.findByIdAndUpdate(id,{$set:{status:"approved"}});
-    const message=`Welcome aboard ${updatedUser.name} we are pleased to inform  you that your request has been approved`
+      const updatedUser= await userModel.findOneAndUpdate(
+        { _id: id, status: "pending" },
+        { $set: { status: "approved" } },
+        { new: true }
+      );
+      if (!updatedUser) {
+        return res.status(404).json({ success: false, result: "Pending user not found" });
+      }
+      await userModel.updateMany(
+        { isAdmin: true },
+        { $pull: { notifications: { registrationId: updatedUser._id } } }
+      );
+      const message=`Welcome aboard ${updatedUser.name} we are pleased to inform  you that your request has been approved`
     const html=getEmailTemplate(updatedUser.name,message)
     await sendEmail(updatedUser.email, html, "User approval notice");
     return res.status(200).json({success:true, result:"approved"})
@@ -301,6 +377,7 @@ module.exports = {
   register,
   getCoins,
   getTotalStat,
+  getNotifications,
   addWallet,
   resetPassword,
   recoverAccount,

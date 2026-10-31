@@ -6,6 +6,7 @@ const {
     register,
     getCoins,
     getTotalStat,
+    getNotifications,
     addWallet,
     verify,
     recoverAccount,
@@ -29,6 +30,7 @@ userRouter.post("/login",login )
 userRouter.post("/tklogin",verify, loginWithToken)
 userRouter.get("/getcoins", getCoins)
 userRouter.post("/getstats", verify, getTotalStat)
+userRouter.get("/notifications", verify, getNotifications)
 userRouter.post("/addwallet", verify, addWallet)
 userRouter.post("/forgotpassword", recoverAccount)
 userRouter.post("/resetpassword", resetPassword)

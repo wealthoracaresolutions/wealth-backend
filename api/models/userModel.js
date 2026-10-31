@@ -54,6 +54,13 @@ const UserModel = new Mongoose.Schema({
     ref:"investments",
     default:[]
 }],
+  notifications: [{
+    title: { type: String, required: true },
+    message: { type: String, required: true },
+    registrationId: { type: Schema.Types.ObjectId, ref: "users" },
+    createdAt: { type: Date, default: Date.now },
+    read: { type: Boolean, default: false },
+  }],
   lastDeposit: {
     type: Number,
     

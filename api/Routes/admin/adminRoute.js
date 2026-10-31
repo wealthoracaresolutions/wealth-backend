@@ -13,40 +13,60 @@ const { sendUserNotification } = require("../../services/userEmail");
 
 
 const approveDeposit = async (req, res, next) => {
-
-  const plans = {
-    starter: { bonus: 15, duration: 24 },
-    premium: { bonus: 40, duration: 48 },
-    ultimate: { bonus: 65, duration: 72 },
-    standard: { bonus: 25, duration: 48 },
-    exclusive: { bonus: 50, duration: 72 },
-    corporate: { bonus: 50, duration: 72 },
-  };
-
   const { id } = req.params;
   try {
-    const thisDeposit = await investmentModel.findById(id);
-    const { userId, amount, plan } = thisDeposit;
-    const extra = (plans[plan].bonus * amount) / 100;
-    
-    const newInvestment = await investmentModel.findByIdAndUpdate(
-      id,
-      { $set: { status: "active", approvedDate:new Date() } },
+    const newInvestment = await investmentModel.findOneAndUpdate(
+      { _id: id, status: "pending" },
+      { $set: { status: "active", approvedDate: new Date() } },
       { new: true }
     );
+    if (!newInvestment) {
+      const existingDeposit = await investmentModel.findById(id);
+      if (!existingDeposit) {
+        return res.status(404).json({ success: false, result: "Deposit not found" });
+      }
+      return res.status(409).json({ success: false, result: "Deposit has already been processed" });
+    }
+
+    const { userId, amount, coin } = newInvestment;
+    const currencyNames = {
+      bitcoin: "bitcoin",
+      ethereum: "ethereum",
+      usdt: "USDT",
+      doge: "dogecoin",
+    };
+    const formattedAmount = new Intl.NumberFormat("en-US", {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    }).format(amount);
+    const message = `Your deposit of $${formattedAmount} worth of ${currencyNames[coin] || coin} has been approved.`;
+    const notification = {
+      title: "Deposit approved",
+      message,
+      createdAt: new Date(),
+      read: false,
+    };
 
     const newUserDetails = await userModel.findByIdAndUpdate(
       userId,
-      { $inc: { balance: amount }, $push:{approveDeposit:newInvestment._id} },
+      {
+        $inc: { balance: amount },
+        $push: {
+          activeDeposit: newInvestment._id,
+          notifications: notification,
+        },
+      },
       { new: true }
     );
+    if (!newUserDetails) {
+      throw new Error("User associated with this deposit was not found");
+    }
 
     await sendUserNotification(userId, {
       subject: "Deposit approved - Wealthoracaresolutions",
-      message: `Your ${plan} deposit of ${amount} has been approved and added to your account balance.`,
+      message,
     });
 
-   
     res.status(200).json({ success: true, result: newInvestment });
   } catch (error) {
     next(createCustomError(error.message));
